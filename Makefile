@@ -14,7 +14,8 @@ endif
 
 build: golangci-lint test
 	go build ./...
-	go build ./cmd/...
+	GOOS=darwin go build -o bin/quartzRestServer-darwin-x86_64 ./cmd/quartzRestServer
+	GOOS=linux go build -o bin/quartzRestServer-linux-x86_64 ./cmd/quartzRestServer
 
 mod:
 	go mod tidy
