@@ -1,4 +1,5 @@
 # QuartzRest
+![CI](https://github.com/UnikumAB/quartzRest/workflows/CI/badge.svg)
 
 This service provides a web interface for a quartz cluster that is clustered via database tables. 
 
