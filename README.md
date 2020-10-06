@@ -14,3 +14,8 @@ Flags:
                                Connection string for the postgres database
       --table-prefix="qrtz_"   Prefix of the quartz tables
 ```
+
+## Endpoints
+
+- `/metrics` is the prometheus metrics endpoint. It has a counter for the errors that reports like this: `quartz_error_counter{sched_name="scheduler",trigger_group="DEFAULT",trigger_name="clientPollerTrigger"} 1667`
+This counter increases every 30 seconds when a trigger is in ERROR state.
