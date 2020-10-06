@@ -6,32 +6,34 @@ import (
 	"github.com/UnikumAB/quartzRest/pkg/app"
 	"github.com/UnikumAB/quartzRest/pkg/postgresql"
 
-	"github.com/sirupsen/logrus"
 	"gopkg.in/alecthomas/kingpin.v2"
+)
+
+var (
+	cmd 	= kingpin.New(os.Args[0], "The webserver")
+
+	bindto = cmd.Flag("port", "the host:port to bind on").
+		Default("localhost:8080").
+		Envar("QUARTZ_SERVER_PORT").
+		String()
+
+	pg = cmd.Flag("postgres-connection", "Connection string for the postgres database").
+		Short('P').
+		Envar("QUARTZ_SERVER_POSTGRESS_CONNECTION").
+		Required().
+		String()
+
+	prefix = cmd.Flag("table-prefix", "Prefix of the quartz tables").
+		Default("qrtz_").
+		Envar("QUARTZ_SERVER_PREFIX").
+		String()
 )
 
 func main() {
 	a := app.App{}
-	pgConn := ""
-	cmd := kingpin.New(os.Args[0], "The webserver")
-	cmd.Flag("port", "the port to run on").
-		Default("localhost:8080").
-		Envar("QUARTZ_SERVER_PORT").
-		StringVar(&a.Port)
-	cmd.Flag("postgres-connection", "Connection string for the postgres database").
-		Short('P').
-		Envar("QUARTZ_SERVER_POSTGRESS_CONNECTION").
-		StringVar(&pgConn)
-	cmd.Flag("table-prefix", "Prefix of the quartz tables").
-		Default("qrtz_").
-		Envar("QUARTZ_SERVER_PREFIX").
-		StringVar(&a.Prefix)
 	kingpin.MustParse(cmd.Parse(os.Args[1:]))
-	if pgConn != "" {
-		a.DB = postgresql.ConnectPostgresql(pgConn)
-	}
-	if a.Port == "" {
-		logrus.Fatal("Port may not be null")
-	}
+	a.DB = postgresql.ConnectPostgresql(*pg)
+	a.Port = *bindto
+	a.Prefix = *prefix
 	a.Run()
 }
