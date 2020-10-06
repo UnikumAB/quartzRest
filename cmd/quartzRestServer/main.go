@@ -20,7 +20,7 @@ var (
 
 	pg = cmd.Flag("postgres-connection", "Connection string for the postgres database").
 		Short('P').
-		Envar("QUARTZ_SERVER_POSTGRESS_CONNECTION").
+		Envar("QUARTZ_SERVER_POSTGRES_CONNECTION").
 		Required().
 		String()
 
