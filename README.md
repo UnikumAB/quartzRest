@@ -5,7 +5,7 @@ This service provides a web interface for a quartz cluster that is clustered via
 The main issue it addresses is the need for alerting when triggers go into error state.
 
 In a later version it will also provide full REST accesss to the quartz tables to assist in trouble shooting. 
-
+##Usage
 ```
 Flags:
       --help                   Show context-sensitive help (also try --help-long and --help-man).
@@ -14,6 +14,13 @@ Flags:
                                Connection string for the postgres database
       --table-prefix="qrtz_"   Prefix of the quartz tables
 ```
+## Environment variables
+
+| variable Name| Description |
+|:----|:----|
+| QUARTZ_SERVER_PORT | same as --port | 
+| QUARTZ_SERVER_POSTGRESS_CONNECTION| same as --postgres-connection |
+| QUARTZ_SERVER_PREFIX | same as --table-prefix |
 
 ## Endpoints
 
