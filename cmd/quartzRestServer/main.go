@@ -29,6 +29,14 @@ func main() {
 	kingpin.MustParse(cmd.Parse(os.Args[1:]))
 	if pgConn != "" {
 		a.DB = postgresql.ConnectPostgresql(pgConn)
+		err := a.DB.Ping()
+		if err != nil {
+			logrus.Fatalf("Failed to ping database: %v", err)
+		}
+		logrus.Infof("using database %v (%v)", pgConn, a.DB.DriverName())
+	}
+	if a.DB == nil {
+		logrus.Fatal("Need to provide some database connection.")
 	}
 	if a.Port == "" {
 		logrus.Fatal("Port may not be null")
