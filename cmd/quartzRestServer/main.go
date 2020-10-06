@@ -6,6 +6,7 @@ import (
 	"github.com/UnikumAB/quartzRest/pkg/app"
 	"github.com/UnikumAB/quartzRest/pkg/postgresql"
 
+	"github.com/sirupsen/logrus"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -35,5 +36,10 @@ func main() {
 	a.DB = postgresql.ConnectPostgresql(*pg)
 	a.Port = *bindto
 	a.Prefix = *prefix
+
+	err := a.DB.Ping()
+	if err != nil {
+		logrus.Fatalf("Failed to ping database: %v", err)
+	}
 	a.Run()
 }
