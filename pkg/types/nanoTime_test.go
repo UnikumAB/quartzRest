@@ -26,7 +26,15 @@ func TestNanoTime_Scan(t *testing.T) {
 			if err := i.Scan(tt.args.src); (err != nil) != tt.wantErr {
 				t.Errorf("Scan() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			assert.Equal(t, tt.wantOutput, i.Format(time.RFC3339Nano))
+			parsedTime, err := time.Parse(time.RFC3339Nano, tt.wantOutput)
+			if err != nil {
+				t.Errorf("Failed to parse wanted time: %v", err)
+			}
+			location, err := time.LoadLocation("Europe/Stockholm")
+			if err != nil {
+				t.Errorf("Failed to load Location: %v", err)
+			}
+			assert.Equal(t, parsedTime.In(location), i.Time.In(location))
 		})
 	}
 }
