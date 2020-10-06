@@ -12,14 +12,20 @@ ifeq (, $(shell which golangci-lint))
 endif
 	golangci-lint run --fix ./...
 
-build: golangci-lint test
+release-build: golangci-lint test
 	go build ./...
 	GOOS=darwin go build -o bin/quartzRestServer-darwin-x86_64 ./cmd/quartzRestServer
 	GOOS=linux go build -o bin/quartzRestServer-linux-x86_64 ./cmd/quartzRestServer
+
+build: golangci-lint test
+	go build ./cmd/quartzRestServer
 
 mod:
 	go mod tidy
 
 all: fmt mod test
 
-.PHONY: imports test fmt mod docker all default
+docker:
+	docker build -t quartzrestserver .
+
+.PHONY: imports test fmt mod docker all default release-build docker
