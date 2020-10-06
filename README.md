@@ -9,8 +9,8 @@ In a later version it will also provide full REST accesss to the quartz tables t
 ```
 Flags:
       --help                   Show context-sensitive help (also try --help-long and --help-man).
-      --port="localhost:8080"  the port to run on
-  -P, --postgres-connection=POSTGRES-CONNECTION  
+      --port="localhost:8080"  the host:port to bind on
+  -P, --postgres-connection=POSTGRES-CONNECTION
                                Connection string for the postgres database
       --table-prefix="qrtz_"   Prefix of the quartz tables
 ```
