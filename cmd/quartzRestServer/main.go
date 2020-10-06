@@ -66,6 +66,7 @@ func init() {
 	viper.SetDefault("bind", "localhost:8080")
 	viper.SetDefault("table-prefix", "qrtz_")
 
+	viper.SetEnvPrefix("QUARTZ_SERVER")
 	viper.AutomaticEnv()
 }
 
