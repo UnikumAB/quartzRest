@@ -1,45 +1,108 @@
 package main
 
 import (
+	"fmt"
+	"net/url"
 	"os"
 
 	"github.com/UnikumAB/quartzRest/pkg/app"
 	"github.com/UnikumAB/quartzRest/pkg/postgresql"
-
+	"github.com/mitchellh/go-homedir"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/alecthomas/kingpin.v2"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
-	cmd = kingpin.New(os.Args[0], "The webserver")
+	cfgFile string
+	rootCmd = &cobra.Command{
+		Use:   os.Args[0],
+		Short: "QuartzRest is a simple tool for accessing quartz data tables.",
+		Run: func(cmd *cobra.Command, args []string) {
+			a := app.App{}
 
-	bindto = cmd.Flag("bind", "the host:port to bind to").
-		Default("localhost:8080").
-		Envar("QUARTZ_SERVER_BIND").
-		String()
+			url, err := url.Parse(viper.GetString("postgres-connection"))
+			if err != nil {
+				logrus.Fatalf("Failed parse database url: %v", err)
+			}
+			if url.Scheme == "postgres" {
+				a.DB = postgresql.ConnectPostgresql(url.String())
+			}
+			err = a.DB.Ping()
+			if err != nil {
+				logrus.Fatalf("Failed to ping database: %v", err)
+			}
 
-	pg = cmd.Flag("postgres-connection", "Connection string for the postgres database").
-		Short('P').
-		Envar("QUARTZ_SERVER_POSTGRESS_CONNECTION").
-		Required().
-		String()
+			logrus.Infof("Connected to DB %q", url.Redacted())
+			a.Port = viper.GetString("bind")
+			logrus.Infof("Listening on %q", a.Port)
+			a.Prefix = viper.GetString("table-prefix")
+			logrus.Infof("Using table prefix %q", a.Prefix)
 
-	prefix = cmd.Flag("table-prefix", "Prefix of the quartz tables").
-		Default("qrtz_").
-		Envar("QUARTZ_SERVER_PREFIX").
-		String()
+			a.Run()
+		},
+	}
 )
 
-func main() {
-	a := app.App{}
-	kingpin.MustParse(cmd.Parse(os.Args[1:]))
-	a.DB = postgresql.ConnectPostgresql(*pg)
-	a.Port = *bindto
-	a.Prefix = *prefix
-
-	err := a.DB.Ping()
-	if err != nil {
-		logrus.Fatalf("Failed to ping database: %v", err)
+func Execute() {
+	if err := rootCmd.Execute(); err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
-	a.Run()
+}
+
+func init() {
+	cobra.OnInitialize(initConfig)
+
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
+	rootCmd.PersistentFlags().StringP("bind", "b", "localhost:8080", "the host:port to bind to")
+	rootCmd.PersistentFlags().StringP("postgres-connection", "P", "", "Connection string for the postgres database")
+	rootCmd.PersistentFlags().StringP("table-prefix", "p", "qrtz_", "Prefix of the quartz tables")
+	rootCmd.PersistentFlags().Bool("viper", true, "use Viper for configuration")
+	mustComplete(viper.BindPFlag("bind", rootCmd.PersistentFlags().Lookup("bind")))
+	mustComplete(viper.BindPFlag("postgres-connection", rootCmd.PersistentFlags().Lookup("postgres-connection")))
+	mustComplete(viper.BindPFlag("table-prefix", rootCmd.PersistentFlags().Lookup("table-prefix")))
+	mustComplete(viper.BindPFlag("useViper", rootCmd.PersistentFlags().Lookup("viper")))
+	viper.SetDefault("bind", "localhost:8080")
+	viper.SetDefault("table-prefix", "qrtz_")
+
+	viper.AutomaticEnv()
+}
+
+func mustComplete(err error) {
+	if err != nil {
+		logrus.Fatalf("Failure: %v", err)
+	}
+}
+
+func er(msg interface{}) {
+	fmt.Println("Error:", msg)
+	os.Exit(1)
+}
+
+func initConfig() {
+	if cfgFile != "" {
+		// Use config file from the flag.
+		viper.SetConfigFile(cfgFile)
+	} else {
+		// Find home directory.
+		home, err := homedir.Dir()
+		if err != nil {
+			er(err)
+		}
+
+		// Search config in home directory with name ".cobra" (without extension).
+		viper.AddConfigPath(home)
+		viper.SetConfigName(".cobra")
+	}
+
+	viper.AutomaticEnv()
+
+	if err := viper.ReadInConfig(); err == nil {
+		fmt.Println("Using config file:", viper.ConfigFileUsed())
+	}
+}
+
+func main() {
+	Execute()
 }
