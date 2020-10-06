@@ -11,11 +11,11 @@ import (
 )
 
 var (
-	cmd 	= kingpin.New(os.Args[0], "The webserver")
+	cmd = kingpin.New(os.Args[0], "The webserver")
 
-	bindto = cmd.Flag("port", "the host:port to bind on").
+	bindto = cmd.Flag("bind", "the host:port to bind to").
 		Default("localhost:8080").
-		Envar("QUARTZ_SERVER_PORT").
+		Envar("QUARTZ_SERVER_BIND").
 		String()
 
 	pg = cmd.Flag("postgres-connection", "Connection string for the postgres database").
