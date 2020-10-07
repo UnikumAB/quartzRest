@@ -19,7 +19,7 @@ jobs:
       - name: Login to Docker Registry
         run:  |
               echo "${{ secrets.DOCKER_HUB_PASSWD }}" | \
-              docker login -u secrets.DOCKER_HUB_LOGIN --password-stdin
+              docker login -u ${{ secrets.DOCKER_HUB_LOGIN }} --password-stdin
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
