@@ -29,3 +29,10 @@ docker:
 	docker build -t quartzrestserver .
 
 .PHONY: imports test fmt mod docker all default release-build docker
+
+release:
+ifeq (, $(shell which goreleaser))
+        curl -sfL https://install.goreleaser.com/github.com/goreleaser/goreleaser.sh | sh
+endif
+	goreleaser --snapshot --skip-publish --rm-dist
+
