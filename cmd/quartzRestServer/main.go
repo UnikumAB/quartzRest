@@ -25,8 +25,11 @@ var (
 			if err != nil {
 				logrus.Fatalf("Failed parse database url: %v", err)
 			}
-			if url.Scheme == "postgres" {
+			switch url.Scheme {
+			case "postgres":
 				a.DB = postgresql.ConnectPostgresql(url.String())
+			default:
+				logrus.Fatalf("No supported database specified. URL=%v", url)
 			}
 			err = a.DB.Ping()
 			if err != nil {
@@ -94,7 +97,7 @@ func initConfig() {
 
 		// Search config in home directory with name ".cobra" (without extension).
 		viper.AddConfigPath(home)
-		viper.SetConfigName(".cobra")
+		viper.SetConfigName(".quartzRest")
 	}
 
 	viper.AutomaticEnv()

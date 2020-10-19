@@ -16,6 +16,9 @@ func (app App) SchedulerHandler() http.HandlerFunc {
 		if err != nil {
 			logrus.Fatalf("Failed to select schedulers: %v", err)
 		}
+		if schedulers == nil {
+			schedulers = []model.SchedulerState{}
+		}
 		encoder := json.NewEncoder(writer)
 		encoder.SetIndent("", "  ")
 		err = encoder.Encode(schedulers)

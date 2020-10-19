@@ -86,6 +86,7 @@ func Router(app App) *mux.Router {
 	r.Use(commonMiddleware)
 	r.Handle("/metrics", promhttp.Handler())
 	r.Handle("/schedulers", app.SchedulerHandler())
+	r.Handle("/triggers", app.TriggerHandler())
 	return r
 }
 
@@ -93,12 +94,13 @@ func (app App) runScheduledJobs(ctx context.Context) chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		errorCounter := app.createErrorCounter()
-		app.updateErrorCounter(errorCounter)
+		blockedCounter := app.createBlockedCounter()
+		app.updateErrorCounter(errorCounter, blockedCounter)
 		ticker := time.NewTicker(30 * time.Second)
 		for {
 			select {
 			case <-ticker.C:
-				app.updateErrorCounter(errorCounter)
+				app.updateErrorCounter(errorCounter, blockedCounter)
 			case <-ctx.Done():
 				logrus.Info("Stopping regular jobs")
 				close(done)

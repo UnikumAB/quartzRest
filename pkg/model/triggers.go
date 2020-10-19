@@ -1,6 +1,7 @@
 package model
 
 import (
+	"database/sql"
 	"database/sql/driver"
 	"errors"
 	"fmt"
@@ -9,22 +10,22 @@ import (
 )
 
 type Triggers struct {
-	SchedName    string
-	TriggerName  string
-	TriggerGroup string
-	JobName      string
-	JobGroup     string
-	Description  string
-	NextFireTime types.NanoTime
-	PrevFireTime types.NanoTime
-	Priority     int
-	TriggerState TriggerStateEnum
-	TriggerType  string
-	StartTime    types.NanoTime
-	EndTime      types.NanoTime
-	CalendarName string
-	MisfireInstr int
-	JobData      []byte
+	SchedName    string           `db:"sched_name"`
+	TriggerName  string           `db:"trigger_name"`
+	TriggerGroup string           `db:"trigger_group"`
+	JobName      string           `db:"job_name"`
+	JobGroup     string           `db:"job_group"`
+	Description  sql.NullString   `db:"description"`
+	NextFireTime types.NanoTime   `db:"next_fire_time"`
+	PrevFireTime types.NanoTime   `db:"prev_fire_time"`
+	Priority     int              `db:"priority"`
+	TriggerState TriggerStateEnum `db:"trigger_state"`
+	TriggerType  string           `db:"trigger_type"`
+	StartTime    types.NanoTime   `db:"start_time"`
+	EndTime      types.NanoTime   `db:"end_time"`
+	CalendarName sql.NullString   `db:"calendar_name"`
+	MisfireInstr int              `db:"misfire_instr"`
+	JobData      []byte           `db:"job_data"`
 }
 
 type TriggerStateEnum string
