@@ -1,13 +1,13 @@
 package postgresql
 
 import (
+	_ "github.com/jackc/pgx/stdlib"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 )
 
 func ConnectPostgresql(dataSourceName string) *sqlx.DB {
-	db, err := sqlx.Connect("postgres", dataSourceName)
+	db, err := sqlx.Connect("pgx", dataSourceName)
 	if err != nil {
 		logrus.Fatalf("Failed to connect to database: %s", err)
 	}
