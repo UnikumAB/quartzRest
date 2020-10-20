@@ -2,6 +2,8 @@ package app
 
 import (
 	"context"
+	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -84,6 +86,7 @@ func Router(app App) *mux.Router {
 		Name: "http_in_flight_count",
 		Help: "Number of requests in flight"}))
 	r.Use(commonMiddleware)
+	r.Handle("/", app.HealthHandler())
 	r.Handle("/metrics", promhttp.Handler())
 	r.Handle("/schedulers", app.SchedulerHandler())
 	r.Handle("/triggers", app.TriggerHandler())
@@ -109,4 +112,22 @@ func (app App) runScheduledJobs(ctx context.Context) chan struct{} {
 		}
 	}()
 	return done
+}
+
+func (app App) HealthHandler() http.HandlerFunc {
+	return func(response http.ResponseWriter, request *http.Request) {
+		status := 200
+		msg := "OK"
+		err := app.DB.Ping()
+		if err != nil {
+			status = 400
+			msg = fmt.Sprintf("Failed to ping DB: %v", err)
+		}
+
+		response.WriteHeader(status)
+		_, err = response.Write([]byte(msg))
+		if err != nil {
+			log.Fatalf("Failed to write to response: %v", err)
+		}
+	}
 }
