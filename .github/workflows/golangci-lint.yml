@@ -4,9 +4,10 @@ on:
     tags:
       - '*'
     branches:
-      - master
       - main
   pull_request:
+    branches:
+      - main
 jobs:
   golangci:
     name: lint
