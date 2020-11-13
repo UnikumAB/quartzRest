@@ -11,6 +11,7 @@ func TestNanoTime_Scan(t *testing.T) {
 	type args struct {
 		src interface{}
 	}
+
 	tests := []struct {
 		name       string
 		args       args
@@ -21,6 +22,7 @@ func TestNanoTime_Scan(t *testing.T) {
 		{name: "input type int64", args: struct{ src interface{} }{src: int64(1601018690024)}, wantErr: false, wantOutput: "2020-09-25T09:24:50.024+02:00"},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			i := &NanoTime{}
 			if err := i.Scan(tt.args.src); (err != nil) != tt.wantErr {
@@ -43,6 +45,7 @@ func TestNanoTime_Value(t *testing.T) {
 	type fields struct {
 		Time time.Time
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -58,12 +61,15 @@ func TestNanoTime_Value(t *testing.T) {
 			wantErr: false,
 		},
 	}
+
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			i := NanoTime{
 				Time: tt.fields.Time,
 			}
 			got, err := i.Value()
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Value() error = %v, wantErr %v", err, tt.wantErr)
 				return

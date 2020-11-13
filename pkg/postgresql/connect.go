@@ -11,6 +11,8 @@ func ConnectPostgresql(dataSourceName string) *sqlx.DB {
 	if err != nil {
 		logrus.Fatalf("Failed to connect to database: %s", err)
 	}
+
 	logrus.Debug("Connected to Postgresql database")
+
 	return db
 }

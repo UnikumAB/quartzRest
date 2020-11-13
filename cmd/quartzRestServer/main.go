@@ -21,7 +21,7 @@ var (
 		Run: func(cmd *cobra.Command, args []string) {
 			a := app.App{}
 
-			url, err := url.Parse(viper.GetString("postgres-connection"))
+			url, err := url.Parse(viper.GetString(postgresConnection))
 			if err != nil {
 				logrus.Fatalf("Failed parse database url: %v", err)
 			}
@@ -54,16 +54,20 @@ func Execute() {
 	}
 }
 
+const (
+	postgresConnection = "postgresConnection"
+)
+
 func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
 	rootCmd.PersistentFlags().StringP("bind", "b", "localhost:8080", "the host:port to bind to")
-	rootCmd.PersistentFlags().StringP("postgres-connection", "P", "", "Connection string for the postgres database")
+	rootCmd.PersistentFlags().StringP(postgresConnection, "P", "", "Connection string for the postgres database")
 	rootCmd.PersistentFlags().StringP("table-prefix", "p", "qrtz_", "Prefix of the quartz tables")
 	rootCmd.PersistentFlags().Bool("viper", true, "use Viper for configuration")
 	mustComplete(viper.BindPFlag("bind", rootCmd.PersistentFlags().Lookup("bind")))
-	mustComplete(viper.BindPFlag("postgres-connection", rootCmd.PersistentFlags().Lookup("postgres-connection")))
+	mustComplete(viper.BindPFlag(postgresConnection, rootCmd.PersistentFlags().Lookup(postgresConnection)))
 	mustComplete(viper.BindPFlag("table-prefix", rootCmd.PersistentFlags().Lookup("table-prefix")))
 	mustComplete(viper.BindPFlag("useViper", rootCmd.PersistentFlags().Lookup("viper")))
 	viper.SetDefault("bind", "localhost:8080")

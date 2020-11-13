@@ -41,6 +41,7 @@ func (t *TriggerStateEnum) Scan(src interface{}) error {
 	if src == nil {
 		return errors.New("cannot map null value")
 	}
+
 	if src, ok := src.(string); ok {
 		switch src {
 		case string(ERROR):
@@ -56,8 +57,10 @@ func (t *TriggerStateEnum) Scan(src interface{}) error {
 			*t = ACQUIRED
 			return nil
 		}
+
 		return errors.New("failed to parse string " + src)
 	}
+
 	return fmt.Errorf("cannot parse type %T with value %v", src, src)
 }
 

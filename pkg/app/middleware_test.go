@@ -10,13 +10,16 @@ import (
 
 func Test_commonMiddleware(t *testing.T) {
 	t.Parallel()
+
 	type args struct {
 		path string
 	}
+
 	type want struct {
 		status      int
 		contentType string
 	}
+
 	tests := []struct {
 		name string
 		args args
@@ -46,7 +49,9 @@ func Test_commonMiddleware(t *testing.T) {
 	}
 	router := Router(App{})
 	router.HandleFunc("/test", dummyHandler())
+
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			r, _ := http.NewRequest("GET", tt.args.path, nil)
 			w := httptest.NewRecorder()

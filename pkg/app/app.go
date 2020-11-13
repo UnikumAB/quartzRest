@@ -39,6 +39,7 @@ func (app App) Run() {
 	if err != http.ErrServerClosed {
 		logrus.Fatal(err)
 	}
+
 	<-shutdownDone
 	logrus.Info("All done. Leaving this cruel world.")
 }
@@ -60,20 +61,26 @@ func waitForShutdown(cancel context.CancelFunc, srv *http.Server, channels ...ch
 		)
 		<-signalChan
 		cancel()
+
 		timeout, cancelFunc := context.WithTimeout(context.Background(), 5*time.Second)
+
 		defer cancelFunc()
+
 		if srv != nil {
 			err := srv.Shutdown(timeout)
 			if err != nil {
 				logrus.Errorf("Failed to shutdown server: %v", err)
 			}
 		}
+
 		for _, channel := range channels {
 			<-channel
 		}
+
 		logrus.Info("Shutdown complete")
 		close(done)
 	}()
+
 	return done
 }
 
@@ -90,16 +97,20 @@ func Router(app App) *mux.Router {
 	r.Handle("/metrics", promhttp.Handler())
 	r.Handle("/schedulers", app.SchedulerHandler())
 	r.Handle("/triggers", app.TriggerHandler())
+
 	return r
 }
 
 func (app App) runScheduledJobs(ctx context.Context) chan struct{} {
 	done := make(chan struct{})
-	go func() {
+	go func(ctx context.Context, app App, done chan<- struct{}) {
 		errorCounter := app.createErrorCounter()
 		blockedCounter := app.createBlockedCounter()
+
 		app.updateErrorCounter(errorCounter, blockedCounter)
+
 		ticker := time.NewTicker(30 * time.Second)
+
 		for {
 			select {
 			case <-ticker.C:
@@ -107,10 +118,12 @@ func (app App) runScheduledJobs(ctx context.Context) chan struct{} {
 			case <-ctx.Done():
 				logrus.Info("Stopping regular jobs")
 				close(done)
+
 				return
 			}
 		}
-	}()
+	}(ctx, app, done)
+
 	return done
 }
 
@@ -119,6 +132,7 @@ func (app App) HealthHandler() http.HandlerFunc {
 		status := 200
 		msg := "OK"
 		err := app.DB.Ping()
+
 		if err != nil {
 			status = 400
 			msg = fmt.Sprintf("Failed to ping DB: %v", err)
@@ -126,6 +140,7 @@ func (app App) HealthHandler() http.HandlerFunc {
 
 		response.WriteHeader(status)
 		_, err = response.Write([]byte(msg))
+
 		if err != nil {
 			log.Fatalf("Failed to write to response: %v", err)
 		}

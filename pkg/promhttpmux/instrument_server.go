@@ -10,6 +10,7 @@ import (
 
 func InstrumentHttpDuration(opt prometheus.HistogramOpts) mux.MiddlewareFunc {
 	obs := promauto.NewHistogramVec(opt, []string{"path", "method"})
+
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			route := mux.CurrentRoute(r)
@@ -25,6 +26,7 @@ func InstrumentHttpDuration(opt prometheus.HistogramOpts) mux.MiddlewareFunc {
 // InstrumentHttpDuration implements mux.MiddlewareFunc.
 func InstrumentHttpInFlight(opt prometheus.GaugeOpts) mux.MiddlewareFunc {
 	obs := promauto.NewGaugeVec(opt, []string{"path", "method"})
+
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			route := mux.CurrentRoute(r)
